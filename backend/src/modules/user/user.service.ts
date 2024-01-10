@@ -12,4 +12,18 @@ export class UserService {
       data,
     });
   }
+
+  async getAllUsersId(): Promise<UserPrismaModel[]> {
+    return this.prisma.user.findMany();
+  }
+
+  async getAllUsers(): Promise<Omit<UserPrismaModel, 'id'>[]> {
+    return this.prisma.user.findMany({
+      select: {
+        id: false,
+        email: true,
+        name: true,
+      },
+    });
+  }
 }
