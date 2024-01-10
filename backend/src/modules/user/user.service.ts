@@ -13,16 +13,24 @@ export class UserService {
     });
   }
 
-  async getAllUsersId(): Promise<UserPrismaModel[]> {
+  async getAllUsersId(): Promise<UserPrismaModel[] | null> {
     return this.prisma.user.findMany();
   }
 
-  async getAllUsers(): Promise<Omit<UserPrismaModel, 'id'>[]> {
+  async getAllUsers(): Promise<Omit<UserPrismaModel, 'id'>[] | null> {
     return this.prisma.user.findMany({
       select: {
         id: false,
         email: true,
         name: true,
+      },
+    });
+  }
+
+  async getUserById(userId: string): Promise<UserPrismaModel | null> {
+    return this.prisma.user.findUnique({
+      where: {
+        id: userId,
       },
     });
   }
