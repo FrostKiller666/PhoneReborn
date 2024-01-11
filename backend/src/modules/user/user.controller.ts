@@ -1,4 +1,12 @@
-import { Body, Controller, Inject, Post, Get, Param } from '@nestjs/common';
+import {
+  Body,
+  Controller,
+  Inject,
+  Post,
+  Get,
+  Param,
+  Delete,
+} from '@nestjs/common';
 import { User as UserPrismaModel } from '.prisma/client';
 import { UserService } from './user.service';
 import { CreateUserDto } from './dto/CreateUser.dto';
@@ -32,5 +40,11 @@ export class UserController {
   @Get(':id')
   async getUserById(@Param('id') userId: string): Promise<UserPrismaModel> {
     return this.userService.getUserById(userId);
+  }
+
+  @ApiTags('Users')
+  @Delete(':id')
+  async DeleteUserDto(@Param('id') userId: string): Promise<UserPrismaModel> {
+    return this.userService.deleteUser(userId);
   }
 }

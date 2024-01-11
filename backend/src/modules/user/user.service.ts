@@ -1,6 +1,11 @@
-import { Injectable } from '@nestjs/common';
+import {
+  Injectable,
+  NotFoundException,
+  HttpException,
+  HttpStatus,
+} from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
-import { User as UserPrismaModel } from '@prisma/client';
+import { Prisma, User as UserPrismaModel } from '@prisma/client';
 import { CreateUserDto } from './dto/CreateUser.dto';
 
 @Injectable()
@@ -33,5 +38,30 @@ export class UserService {
         id: userId,
       },
     });
+  }
+
+  async deleteUser(userId: string): Promise<UserPrismaModel> {
+    try {
+      const deleteHandler = await this.prisma.user.delete({
+        where: {
+          id: userId,
+        },
+      });
+
+      return deleteHandler;
+    } catch (error) {
+      if (
+        error instanceof Prisma.PrismaClientKnownRequestError &&
+        error.code === 'P2025'
+      ) {
+        // P2025 is the Prisma error code for record not found
+        throw new NotFoundException(`User with ID ${userId} not found`);
+      } else {
+        throw new HttpException(
+          'Error deleting user from the database',
+          HttpStatus.INTERNAL_SERVER_ERROR,
+        );
+      }
+    }
   }
 }
