@@ -6,6 +6,7 @@ import {
   Get,
   Param,
   Delete,
+  Patch,
 } from '@nestjs/common';
 import { User as UserPrismaModel } from '.prisma/client';
 import { UserService } from './user.service';
@@ -44,7 +45,16 @@ export class UserController {
 
   @ApiTags('Users')
   @Delete(':id')
-  async DeleteUserDto(@Param('id') userId: string): Promise<UserPrismaModel> {
+  async deleteUser(@Param('id') userId: string): Promise<UserPrismaModel> {
     return this.userService.deleteUser(userId);
+  }
+
+  @ApiTags('Users')
+  @Patch(':id')
+  async updateUser(
+    @Param('id') userid: string,
+    @Body() userData: CreateUserDto,
+  ): Promise<UserPrismaModel> {
+    return this.userService.updateUser(userid, userData);
   }
 }

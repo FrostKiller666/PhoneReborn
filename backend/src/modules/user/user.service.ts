@@ -1,9 +1,4 @@
-import {
-  Injectable,
-  NotFoundException,
-  HttpException,
-  HttpStatus,
-} from '@nestjs/common';
+import { Injectable, NotFoundException, HttpException, HttpStatus } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
 import { Prisma, User as UserPrismaModel } from '@prisma/client';
 import { CreateUserDto } from './dto/CreateUser.dto';
@@ -28,6 +23,8 @@ export class UserService {
         id: false,
         email: true,
         name: true,
+        createdAt: true,
+        updatedAt: true,
       },
     });
   }
@@ -59,9 +56,21 @@ export class UserService {
       } else {
         throw new HttpException(
           'Error deleting user from the database',
-          HttpStatus.INTERNAL_SERVER_ERROR,
+          HttpStatus.INTERNAL_SERVER_ERROR
         );
       }
     }
+  }
+
+  async updateUser(userId: string, userData: CreateUserDto): Promise<UserPrismaModel> {
+    return this.prisma.user.update({
+      where: {
+        id: userId,
+      },
+      data: {
+        name: userData.name,
+        email: userData.email,
+      },
+    });
   }
 }
