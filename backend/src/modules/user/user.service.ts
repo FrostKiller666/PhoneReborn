@@ -2,6 +2,7 @@ import { Injectable, NotFoundException, HttpException, HttpStatus } from '@nestj
 import { PrismaService } from '../prisma/prisma.service';
 import { Prisma, User as UserPrismaModel } from '@prisma/client';
 import { CreateUserDto } from './dto/CreateUser.dto';
+import { ResUserDto } from './dto/ResUser.dto';
 
 @Injectable()
 export class UserService {
@@ -47,30 +48,38 @@ export class UserService {
 
       return deleteHandler;
     } catch (error) {
-      if (
-        error instanceof Prisma.PrismaClientKnownRequestError &&
-        error.code === 'P2025'
-      ) {
+      if (error instanceof Prisma.PrismaClientKnownRequestError && error.code === 'P2025') {
         // P2025 is the Prisma error code for record not found
         throw new NotFoundException(`User with ID ${userId} not found`);
       } else {
-        throw new HttpException(
-          'Error deleting user from the database',
-          HttpStatus.INTERNAL_SERVER_ERROR
-        );
+        throw new HttpException('Error deleting user from the database', HttpStatus.INTERNAL_SERVER_ERROR);
       }
     }
   }
 
-  async updateUser(userId: string, userData: CreateUserDto): Promise<UserPrismaModel> {
-    return this.prisma.user.update({
-      where: {
-        id: userId,
-      },
-      data: {
-        name: userData.name,
-        email: userData.email,
-      },
-    });
+  async updateUser(userId: string, userData: CreateUserDto): Promise<ResUserDto> {
+    try {
+      const uptadeHandler = await this.prisma.user.update({
+        where: {
+          id: userId,
+        },
+        data: {
+          name: userData.name,
+          email: userData.email,
+        },
+      });
+      if (uptadeHandler)
+        return {
+          message: 'User was successfully updated.',
+          statusCode: 200,
+        };
+    } catch (error) {
+      if (error instanceof Prisma.PrismaClientKnownRequestError && error.code === 'P2025') {
+        // P2025 is the Prisma error code for record not found
+        throw new NotFoundException(`User with ID ${userId} not found`);
+      } else {
+        throw new HttpException('Error updating user from the database', HttpStatus.INTERNAL_SERVER_ERROR);
+      }
+    }
   }
 }
